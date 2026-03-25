@@ -8,20 +8,28 @@
 
 ---
 
-## CI/CD with GitHub Actions (Recommended)
+## CI/CD with GitHub Actions – Self-Hosted Runner (Private IP VM)
 
-Every `git push` to `main` automatically deploys to your VM. No manual SSH needed.
+Since the VM has only a **private IP**, GitHub Actions cannot SSH into it.
+Instead, install a **self-hosted runner** on the VM — it connects *outward* to GitHub
+over HTTPS (port 443). No inbound port needs to be opened for CI/CD.
+
+The **Application Gateway** is configured separately for inbound HTTP/HTTPS traffic from users.
 
 ### Architecture
 ```
-Your PC  →  git push  →  GitHub  →  GitHub Actions  →  SSH → VM (Nginx serves site)
+Your PC → git push → GitHub → GitHub Actions (runner on VM pulls & deploys) → Nginx
+                                    ↑
+                          VM connects OUT to GitHub
+                          (only outbound HTTPS needed)
+
+Users → Application Gateway (public IP) → VM private IP → Nginx
 ```
 
 ### One-time Setup
 
 #### A. Push your code to GitHub
 ```powershell
-# In PowerShell (Windows), from your project folder
 cd "C:\Ganesh\Personal\cloudflare"
 git init
 git add .
@@ -31,73 +39,88 @@ git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
 git push -u origin main
 ```
 
-#### B. Enable password-based SSH on your VM
-
-By default some VMs disable password login. Run this on the **VM** to allow it:
+#### B. Install Nginx & rsync on the VM
 ```bash
-sudo nano /etc/ssh/sshd_config
+sudo apt update && sudo apt install -y nginx rsync
+sudo systemctl enable nginx && sudo systemctl start nginx
 ```
-Find and set these two lines (add them if missing):
-```
-PasswordAuthentication yes
-PermitRootLogin yes        # only if you log in as root
-```
-Save, then restart SSH:
+
+#### C. Install the GitHub Actions self-hosted runner on the VM
+
+1. Go to your GitHub repo → **Settings → Actions → Runners → New self-hosted runner**
+2. Select **Linux** and **x64**
+3. Copy and run the commands GitHub shows — they look like this:
+
 ```bash
-sudo systemctl restart ssh
+# Create a dedicated directory for the runner
+mkdir -p ~/actions-runner && cd ~/actions-runner
+
+# Download (use the exact version/URL from the GitHub UI)
+curl -o actions-runner-linux-x64.tar.gz -L \
+  https://github.com/actions/runner/releases/download/vX.X.X/actions-runner-linux-x64-X.X.X.tar.gz
+
+tar xzf ./actions-runner-linux-x64.tar.gz
+
+# Configure (use the token from the GitHub UI — it expires in 1 hour)
+./config.sh --url https://github.com/YOUR_USERNAME/YOUR_REPO --token YOUR_TOKEN
 ```
 
-#### C. Add GitHub Secrets
-Go to your repo → **Settings → Secrets and variables → Actions → New repository secret**
-
-| Secret Name   | Value |
-|---|---|
-| `VM_HOST`     | Your VM's public IP or domain (e.g. `203.0.113.10`) |
-| `VM_USER`     | SSH username (e.g. `ganesh`, `ubuntu`, `root`) |
-| `VM_PASSWORD` | Your Linux VM login password |
-| `VM_PORT`     | SSH port — usually `22` (optional) |
-
-#### D. Bootstrap the VM (first time only)
+#### D. Run the runner as a background service (survives reboots)
 ```bash
-# On the VM — clone your repo and set up Nginx
-sudo apt update && sudo apt install -y nginx git
+# Still in ~/actions-runner
+sudo ./svc.sh install
+sudo ./svc.sh start
+sudo ./svc.sh status    # should show: active (running)
+```
 
+#### E. Allow the runner user to deploy without a password prompt
+```bash
+# Replace 'ganesh' with the Linux username that runs the runner
+echo "ganesh ALL=(ALL) NOPASSWD: /usr/bin/rsync, /usr/bin/chown, /usr/bin/chmod, /bin/systemctl reload nginx" \
+  | sudo tee /etc/sudoers.d/github-runner
+sudo chmod 440 /etc/sudoers.d/github-runner
+```
+
+#### F. Set up the Nginx web root
+```bash
 sudo mkdir -p /var/www/mysite
-sudo git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git /var/www/mysite
 sudo chown -R www-data:www-data /var/www/mysite
 
-# Copy and enable Nginx config
-sudo cp /var/www/mysite/nginx/mysite.conf /etc/nginx/sites-available/mysite
-# Edit the server_name line first:
+# Copy Nginx config
+sudo cp ~/actions-runner/_work/*/mysite/nginx/mysite.conf \
+        /etc/nginx/sites-available/mysite
+
+# Edit server_name — use the VM's private IP (App Gateway proxies to this)
 sudo nano /etc/nginx/sites-available/mysite
 
-sudo ln -s /etc/nginx/sites-available/mysite /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/mysite /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-Or use the automated setup script:
-```bash
-# Download and run the setup script on the VM
-curl -o vm-setup.sh https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/scripts/vm-setup.sh
-bash vm-setup.sh
-```
-
-#### E. Allow the deploy user to run sudo git / nginx without password
-```bash
-# On the VM — edit sudoers so GitHub Actions can deploy without a password prompt
-echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/git, /usr/bin/chown, /usr/bin/chmod, /usr/sbin/nginx, /bin/systemctl reload nginx" \
-  | sudo tee /etc/sudoers.d/github-deploy
-```
-
-#### F. Test the pipeline
+#### G. Test the pipeline
 ```powershell
-# On Windows — make a small change and push
-git add .
-git commit -m "Test CI/CD deploy"
-git push
+# On Windows — push any change
+git add . ; git commit -m "Test CI/CD" ; git push
 ```
 
-Then go to **GitHub → Actions tab** to watch the workflow run. A green tick means it deployed successfully.
+Go to **GitHub → Actions tab** — the job will run on your VM runner and deploy automatically.
+
+---
+
+## Application Gateway Setup (expose VM to the internet)
+
+Once CI/CD works, add an Application Gateway (or Load Balancer) in front of the VM:
+
+| Setting | Value |
+|---|---|
+| Backend pool | VM's **private IP**, port `80` |
+| Health probe | HTTP GET `/` on port `80` |
+| Listener | HTTP port `80` (and HTTPS port `443` with your cert) |
+| Routing rule | Forward all traffic to the backend pool |
+
+> The VM's Nginx `server_name` can be set to `_` (catch-all) since the
+> Application Gateway handles the public domain name.
 
 ---
 

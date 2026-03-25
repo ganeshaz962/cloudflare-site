@@ -10,43 +10,37 @@ on:
 jobs:
   deploy:
     name: Build & Deploy Static Site
-    runs-on: ubuntu-latest
+
+    # Self-hosted runner runs ON the VM itself.
+    # The VM connects OUT to GitHub — no inbound ports needed.
+    # VM only needs outbound HTTPS (port 443) to github.com.
+    runs-on: self-hosted
 
     steps:
-      # ── 1. Checkout code ──────────────────────────────────
+      # ── 1. Checkout latest code directly onto the VM ──────
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # ── 2. (Optional) Validate HTML ───────────────────────
-      # Remove this step if you don't need HTML linting
-      - name: Check files exist
-        run: |
-          echo "Files being deployed:"
-          find . -not -path './.git/*' -not -path './.github/*' -type f | sort
-
-      # ── 3. Deploy to VM via SSH (username + password) ────────
-      - name: Deploy to VM via SSH
-        uses: appleboy/ssh-action@v1.0.3
         with:
-          host:        ${{ secrets.VM_HOST }}       # VM IP or domain
-          username:    ${{ secrets.VM_USER }}       # SSH username (e.g. ganesh)
-          password:    ${{ secrets.VM_PASSWORD }}   # SSH password
-          port:        ${{ secrets.VM_PORT || 22 }} # SSH port (default 22)
-          script: |
-            set -e
+          clean: true           # ensure a clean workspace each run
 
-            SITE_DIR="/var/www/mysite"
+      # ── 2. Deploy files to Nginx web root ─────────────────
+      - name: Deploy to web root
+        run: |
+          set -e
+          SITE_DIR="/var/www/mysite"
 
-            echo "==> Pulling latest code from GitHub..."
-            cd $SITE_DIR
-            sudo git fetch --all
-            sudo git reset --hard origin/main
+          echo "==> Syncing files to web root..."
+          sudo rsync -av --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'scripts' \
+            $GITHUB_WORKSPACE/ $SITE_DIR/
 
-            echo "==> Fixing file permissions..."
-            sudo chown -R www-data:www-data $SITE_DIR
-            sudo chmod -R 755 $SITE_DIR
+          echo "==> Fixing file permissions..."
+          sudo chown -R www-data:www-data $SITE_DIR
+          sudo chmod -R 755 $SITE_DIR
 
-            echo "==> Reloading Nginx..."
-            sudo systemctl reload nginx
+          echo "==> Reloading Nginx..."
+          sudo systemctl reload nginx
 
-            echo "==> Deployment complete!"
+          echo "==> Deployment complete!"
