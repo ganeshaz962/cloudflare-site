@@ -3,80 +3,161 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Today's Doodle – Events & Memories</title>
+  <title>TTG Friends – Today's Events & Memories</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-  <!-- ===== HEADER / DOODLE LOGO ===== -->
+  <!-- ════════════════════════════════════════
+       HEADER
+  ════════════════════════════════════════ -->
   <header class="site-header">
-    <div class="logo-wrap">
-      <span class="logo-g">G</span><span class="logo-a">a</span><span class="logo-n">n</span><span class="logo-e">e</span><span class="logo-s">s</span><span class="logo-h">h</span>
-      <span class="logo-dot">•</span>
-      <span class="logo-today">Today</span>
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-ttg">TTG</span><span class="brand-friends">Friends</span>
+        <span class="brand-dot">●</span>
+      </div>
+      <div class="header-right">
+        <div class="live-clock" id="live-clock">00:00:00</div>
+      </div>
     </div>
-    <p class="tagline" id="tagline">Celebrating every day, one doodle at a time.</p>
   </header>
 
-  <!-- ===== DATE BANNER ===== -->
-  <section class="date-banner">
-    <div class="date-card">
-      <div class="date-day" id="date-day">—</div>
-      <div class="date-month-year" id="date-month-year">—</div>
-    </div>
-    <div class="date-quote" id="date-quote"></div>
-  </section>
-
-  <!-- ===== TODAY IN HISTORY ===== -->
-  <section class="section events-section">
-    <h2 class="section-title">
-      <span class="icon">🗓️</span> On This Day in History
-    </h2>
-    <div class="events-grid" id="events-grid">
-      <!-- Cards injected by JS -->
+  <!-- ════════════════════════════════════════
+       HERO – DATE + QUOTE
+  ════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-date-block">
+        <div class="hero-day" id="hero-day">—</div>
+        <div class="hero-date-meta">
+          <div class="hero-weekday" id="hero-weekday">—</div>
+          <div class="hero-monthyear" id="hero-monthyear">—</div>
+        </div>
+      </div>
+      <blockquote class="hero-quote" id="hero-quote"></blockquote>
     </div>
   </section>
 
-  <!-- ===== TODAY'S ACTIVITIES ===== -->
-  <section class="section activities-section">
-    <h2 class="section-title">
-      <span class="icon">⚡</span> Things to Do Today
-    </h2>
-    <ul class="activity-list" id="activity-list">
-      <!-- Items injected by JS -->
-    </ul>
-  </section>
+  <!-- ════════════════════════════════════════
+       MAIN CONTENT
+  ════════════════════════════════════════ -->
+  <main class="main-wrap">
 
-  <!-- ===== PHOTO GALLERY ===== -->
-  <section class="section gallery-section">
-    <h2 class="section-title">
-      <span class="icon">📷</span> My Memories
-    </h2>
-    <p class="gallery-hint">Add your photos to the <code>photos/</code> folder and list them below.</p>
-    <div class="gallery-grid" id="gallery-grid">
-      <!-- Add <img> tags here once you drop photos into the photos/ folder -->
-      <!-- Example (uncomment and edit):
-      <div class="gallery-item">
-        <img src="photos/trip-2025.jpg" alt="Trip 2025" loading="lazy" />
-        <span class="caption">Trip 2025</span>
-      </div>
-      <div class="gallery-item">
-        <img src="photos/birthday.jpg" alt="Birthday" loading="lazy" />
-        <span class="caption">Birthday</span>
-      </div>
-      -->
-      <div class="gallery-placeholder">
-        <div class="placeholder-icon">🖼️</div>
-        <p>Your photos will appear here.<br/>Drop them in the <code>photos/</code> folder and add <code>&lt;img&gt;</code> tags above.</p>
-      </div>
+    <!-- TWO-COLUMN: FEED + SIDEBAR -->
+    <div class="feed-layout">
+
+      <!-- LEFT: TODAY'S EVENTS FEED -->
+      <section class="feed-col">
+        <h2 class="section-heading">
+          <span class="heading-dot" style="background:#6c63ff"></span>
+          Today's Updates
+        </h2>
+        <div class="event-feed" id="event-feed">
+          <!-- Injected by JS -->
+        </div>
+      </section>
+
+      <!-- RIGHT: SIDEBAR -->
+      <aside class="sidebar-col">
+
+        <div class="sidebar-card">
+          <h3 class="sidebar-title">🗓 On This Day</h3>
+          <div class="history-list" id="history-list"></div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3 class="sidebar-title">⚡ Things To Do</h3>
+          <ul class="todo-list" id="todo-list"></ul>
+        </div>
+
+      </aside>
     </div>
-  </section>
 
-  <!-- ===== FOOTER ===== -->
+    <!-- ════════════════════════════════════════
+         PHOTO MEMORIES GRID
+    ════════════════════════════════════════ -->
+    <section class="memories-section">
+      <h2 class="section-heading">
+        <span class="heading-dot" style="background:#ff6584"></span>
+        Photo Memories
+      </h2>
+      <p class="memories-hint">Drop your photos into the <code>photos/</code> folder, then copy the card template below for each photo.</p>
+
+      <div class="photo-grid" id="photo-grid">
+
+        <article class="photo-card">
+          <div class="photo-img-wrap">
+            <img src="photos/shared image.jpg" alt="Today's Event" loading="lazy" />
+            <span class="photo-badge">Today</span>
+          </div>
+          <div class="photo-body">
+            <h3 class="photo-title">🎉 Happy Ugadi & Gudi Padwa!</h3>
+            <p class="photo-desc">Wishing everyone a very Happy New Year! May this Ugadi bring joy, prosperity, and new beginnings to all TTG Friends. 🌸</p>
+            <div class="photo-meta">
+              <span class="photo-date">📅 25 Mar 2026</span>
+              <span class="photo-loc">📍 TTG Friends</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="photo-card">
+          <div class="photo-img-wrap">
+            <img src="photos/shared image (1).jpg" alt="Today's Celebration" loading="lazy" />
+            <span class="photo-badge">Today</span>
+          </div>
+          <div class="photo-body">
+            <h3 class="photo-title">✨ Together We Celebrate</h3>
+            <p class="photo-desc">Every moment shared with friends becomes a lifetime memory. Here's to more such beautiful moments together! 💛</p>
+            <div class="photo-meta">
+              <span class="photo-date">📅 25 Mar 2026</span>
+              <span class="photo-loc">📍 TTG Friends</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="photo-card">
+          <div class="photo-img-wrap">
+            <img src="photos/shared image (2).jpg" alt="Today's Memories" loading="lazy" />
+            <span class="photo-badge">Today</span>
+          </div>
+          <div class="photo-body">
+            <h3 class="photo-title">🌟 Making Memories</h3>
+            <p class="photo-desc">Today is special — not because of what happens, but because of the people we share it with. Cheers to TTG Friends! 🥂</p>
+            <div class="photo-meta">
+              <span class="photo-date">📅 25 Mar 2026</span>
+              <span class="photo-loc">📍 TTG Friends</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Empty state – hidden once you add a photo card above -->
+        <div class="photo-empty" id="photo-empty" style="display:none">
+          <div class="photo-empty-icon">📸</div>
+          <h3>Add Today's Photos</h3>
+          <p>Drop photos into the <code>photos/</code> folder and add cards above.</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════ -->
   <footer class="site-footer">
-    <p>Made with ❤️ by Ganesh &nbsp;|&nbsp; <span id="footer-year"></span></p>
+    <div class="footer-inner">
+      <span class="footer-brand">TTG Friends</span>
+      <span class="footer-sep">·</span>
+      <span id="footer-copy"></span>
+      <span class="footer-sep">·</span>
+      <span class="footer-tag">Every day is worth remembering 🌟</span>
+    </div>
   </footer>
 
   <script src="js/main.js"></script>
+</body>
+</html>
 </body>
 </html>

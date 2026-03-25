@@ -1,29 +1,38 @@
-/* =========================================================
-   main.js – Powers the "Today Doodle" page
+﻿/* =========================================================
+   main.js - TTG Friends
    ========================================================= */
 
-// ── 1. DATE & FOOTER ──────────────────────────────────────
-const now   = new Date();
-const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const months= ['January','February','March','April','May','June',
-               'July','August','September','October','November','December'];
+// -- 1. DATE & FOOTER -------------------------------------
+const now    = new Date();
+const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const months = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
 
-document.getElementById('date-day').textContent =
-  String(now.getDate()).padStart(2, '0');
-
-document.getElementById('date-month-year').textContent =
-  `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getFullYear()}`;
-
-document.getElementById('footer-year').textContent =
-  `© ${now.getFullYear()} Ganesh`;
+document.getElementById('hero-day').textContent       = String(now.getDate()).padStart(2, '0');
+document.getElementById('hero-weekday').textContent   = days[now.getDay()];
+document.getElementById('hero-monthyear').textContent = `${months[now.getMonth()]} ${now.getFullYear()}`;
+document.getElementById('footer-copy').textContent    = `(c) ${now.getFullYear()} TTG Friends`;
 
 
-// ── 2. DAILY QUOTE (rotates by day-of-year) ───────────────
+// -- 2. LIVE CLOCK ----------------------------------------
+function updateClock() {
+  const t = new Date();
+  const hh = String(t.getHours()).padStart(2,'0');
+  const mm = String(t.getMinutes()).padStart(2,'0');
+  const ss = String(t.getSeconds()).padStart(2,'0');
+  const el = document.getElementById('live-clock');
+  if (el) el.textContent = `${hh}:${mm}:${ss}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+
+// -- 3. DAILY QUOTE ---------------------------------------
 const quotes = [
   "Every day is a new beginning. Take a deep breath and start again.",
   "Make today so awesome that yesterday gets jealous.",
   "The secret of getting ahead is getting started.",
-  "Smile in the mirror. Do that every morning and you'll start to see a big difference in your life.",
+  "Smile in the mirror. Do that every morning and you'll see a big difference.",
   "Your only limit is your mind.",
   "Dream big. Work hard. Stay humble.",
   "Today is a perfect day to be happy.",
@@ -38,96 +47,120 @@ const quotes = [
 ];
 
 function dayOfYear(d) {
-  const start = new Date(d.getFullYear(), 0, 0);
-  return Math.floor((d - start) / 86400000);
+  return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
 }
 
-document.getElementById('date-quote').textContent =
-  '"' + quotes[dayOfYear(now) % quotes.length] + '"';
+const quoteEl = document.getElementById('hero-quote');
+if (quoteEl) quoteEl.textContent = '"' + quotes[dayOfYear(now) % quotes.length] + '"';
 
 
-// ── 3. ON THIS DAY – EVENTS ──────────────────────────────
-//  Key: "DD-MM" → array of {year, text}
-const historyData = {
-  "01-01": [{year:"2000",text:"The world celebrated the Y2K millennium without major computer failures."},
-            {year:"1863",text:"US President Lincoln signs the Emancipation Proclamation."}],
-  "14-04": [{year:"1912",text:"RMS Titanic strikes an iceberg and sinks the following morning."},
-            {year:"1865",text:"President Abraham Lincoln is shot at Ford's Theatre."}],
-  "20-07": [{year:"1969",text:"Apollo 11 Moon Landing – Neil Armstrong takes humanity's first steps on the Moon."},
-            {year:"1976",text:"NASA's Viking 1 spacecraft lands on Mars."}],
-  "12-04": [{year:"1961",text:"Yuri Gagarin becomes the first human to travel in outer space."},
-            {year:"1981",text:"First Space Shuttle mission (STS-1) launches from Kennedy Space Center."}],
-  "09-11": [{year:"1989",text:"The Berlin Wall falls, reuniting East and West Germany."},
-            {year:"1918",text:"World War I ends as Germany signs an armistice."}],
-  "04-07": [{year:"1776",text:"The United States Declaration of Independence is adopted by the Congress."},
-            {year:"1997",text:"Mars Pathfinder lands on Mars, deploying Sojourner rover."}],
-  "25-03": [{year:"1807",text:"The Slave Trade Act 1807 abolishes the slave trade in the British Empire."},
-            {year:"1655",text:"Christiaan Huygens discovers Titan, Saturn's largest moon."},
-            {year:"1436",text:"Construction of Florence Cathedral (Brunelleschi's Dome) is completed."}],
+// -- 4. TODAY'S EVENTS FEED (left column) -----------------
+//  Key: "DD-MM" -> array of {year, text, icon?}
+const feedData = {
+  "25-03": [
+    { year:"2026", text:"Happy Ugadi & Gudi Padwa! Wishing all TTG Friends a joyful, prosperous New Year filled with love and laughter. 🌸🎊", icon:"🎉" },
+    { year:"2026", text:"Together we celebrate — every moment shared with friends becomes a lifetime memory. Cheers TTG Friends! 💛", icon:"✨" },
+    { year:"1807", text:"The Slave Trade Act 1807 abolished the slave trade across the British Empire." },
+    { year:"1655", text:"Christiaan Huygens discovers Titan, Saturn's largest moon." },
+    { year:"1436", text:"Construction of Florence Cathedral's iconic Brunelleschi Dome is completed." },
+  ],
 };
 
-function pad(n) { return String(n).padStart(2, '0'); }
-const todayKey = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}`;
-
-// Fallback events if today has no entry
-const fallbackEvents = [
-  {year:"1928",text:"Alexander Fleming discovers penicillin, revolutionising medicine."},
-  {year:"1969",text:"The Internet's precursor, ARPANET, sends its first message."},
-  {year:"1990",text:"The Hubble Space Telescope is launched aboard Space Shuttle Discovery."},
-  {year:"2004",text:"Mark Zuckerberg launches "The Facebook" from his Harvard dorm room."},
-  {year:"2007",text:"Apple unveils the first iPhone, changing mobile computing forever."},
-  {year:"1953",text:"Watson and Crick publish their discovery of the double helix structure of DNA."},
+const fallbackFeed = [
+  { year:"History", text:"On this day, many remarkable events shaped the world as we know it today." },
+  { year:"1928", text:"Alexander Fleming discovers penicillin, revolutionising medicine." },
+  { year:"1969", text:"The Internet's precursor ARPANET sends its first message." },
+  { year:"1990", text:"The Hubble Space Telescope launches aboard Space Shuttle Discovery." },
+  { year:"2007", text:"Apple unveils the first iPhone, forever changing mobile computing." },
+  { year:"1953", text:"Watson and Crick publish their discovery of the DNA double helix structure." },
 ];
 
-const events = historyData[todayKey] || fallbackEvents;
+function pad(n) { return String(n).padStart(2,'0'); }
+const todayKey  = `${pad(now.getDate())}-${pad(now.getMonth()+1)}`;
+const feedItems = feedData[todayKey] || fallbackFeed;
 
-const eventsGrid = document.getElementById('events-grid');
-events.forEach(ev => {
-  const card = document.createElement('div');
-  card.className = 'event-card';
-  card.innerHTML = `<div class="event-year">${ev.year}</div>
-                    <div class="event-desc">${ev.text}</div>`;
-  eventsGrid.appendChild(card);
-});
-
-// Always show at least 4 cards (pad with fallbacks)
-if (events.length < 4) {
-  const extras = fallbackEvents.filter(f => !events.find(e => e.year === f.year));
-  extras.slice(0, 4 - events.length).forEach(ev => {
-    const card = document.createElement('div');
-    card.className = 'event-card';
-    card.innerHTML = `<div class="event-year">${ev.year}</div>
-                      <div class="event-desc">${ev.text}</div>`;
-    eventsGrid.appendChild(card);
+const feedEl = document.getElementById('event-feed');
+if (feedEl) {
+  feedItems.forEach(item => {
+    const card = document.createElement('article');
+    card.className = 'feed-card';
+    card.innerHTML = `
+      <div class="feed-year">${item.year}</div>
+      <div class="feed-text">${item.icon ? item.icon + ' ' : ''}${item.text}</div>
+    `;
+    feedEl.appendChild(card);
   });
 }
 
 
-// ── 4. ACTIVITIES ────────────────────────────────────────
-const weekdayActivities = [
-  {icon:"🧘",text:"10-minute morning meditation or deep breathing"},
-  {icon:"📖",text:"Read one article or book chapter"},
-  {icon:"🚶",text:"Walk for 20 minutes – fresh air, clear mind"},
-  {icon:"✍️",text:"Write 3 things you're grateful for today"},
-  {icon:"💧",text:"Drink at least 8 glasses of water"},
-  {icon:"📱",text:"Call or text someone you haven't spoken to in a while"},
+// -- 5. ON THIS DAY (sidebar) -----------------------------
+const historyData = {
+  "25-03": [
+    { year:"1436", text:"Brunelleschi's Dome completed in Florence." },
+    { year:"1655", text:"Titan (Saturn's moon) discovered by Huygens." },
+    { year:"1807", text:"UK abolishes the slave trade." },
+  ],
+};
+
+const fallbackHistory = [
+  { year:"1969", text:"ARPANET sends its first message." },
+  { year:"1928", text:"Fleming discovers penicillin." },
+  { year:"2004", text:"Facebook launches from Harvard dorm." },
 ];
 
-const weekendActivities = [
-  {icon:"🍳",text:"Cook a new recipe you've been meaning to try"},
-  {icon:"📷",text:"Take a photo walk – capture something beautiful"},
-  {icon:"🌿",text:"Spend time in nature: a park, garden, or trail"},
-  {icon:"🎨",text:"Create something: draw, paint, write, or craft"},
-  {icon:"🎲",text:"Play a board game or puzzle with family/friends"},
-  {icon:"🛁",text:"Have a relaxing self-care evening"},
+const historyItems = historyData[todayKey] || fallbackHistory;
+const historyEl    = document.getElementById('history-list');
+
+if (historyEl) {
+  historyItems.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `
+      <span class="history-year">${item.year}</span>
+      <span class="history-text">${item.text}</span>
+    `;
+    historyEl.appendChild(div);
+  });
+}
+
+
+// -- 6. THINGS TO DO (sidebar) ----------------------------
+const weekdayTodos = [
+  { icon:"🧘", text:"10-min morning meditation" },
+  { icon:"📖", text:"Read one article or chapter" },
+  { icon:"🚶", text:"20-minute walk" },
+  { icon:"✍️", text:"Write 3 things you're grateful for" },
+  { icon:"💧", text:"Drink 8 glasses of water" },
+  { icon:"📱", text:"Call someone you haven't spoken to in a while" },
+];
+
+const weekendTodos = [
+  { icon:"🍳", text:"Cook a new recipe" },
+  { icon:"📷", text:"Take a photo walk" },
+  { icon:"🌿", text:"Spend time in nature" },
+  { icon:"🎨", text:"Create something: draw, paint or write" },
+  { icon:"🎲", text:"Play a game with family or friends" },
+  { icon:"🛁", text:"Enjoy a relaxing self-care evening" },
 ];
 
 const isWeekend = now.getDay() === 0 || now.getDay() === 6;
-const todayActivities = isWeekend ? weekendActivities : weekdayActivities;
+const todoItems = isWeekend ? weekendTodos : weekdayTodos;
+const todoEl    = document.getElementById('todo-list');
 
-const actList = document.getElementById('activity-list');
-todayActivities.forEach(act => {
-  const li = document.createElement('li');
-  li.innerHTML = `<span class="act-icon">${act.icon}</span><span>${act.text}</span>`;
-  actList.appendChild(li);
-});
+if (todoEl) {
+  todoItems.forEach(item => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="todo-icon">${item.icon}</span><span>${item.text}</span>`;
+    todoEl.appendChild(li);
+  });
+}
+
+
+// -- 7. PHOTO EMPTY STATE ---------------------------------
+// Hide the empty state placeholder if real photo cards exist
+const photoGrid  = document.getElementById('photo-grid');
+const photoEmpty = document.getElementById('photo-empty');
+if (photoGrid && photoEmpty) {
+  const realCards = photoGrid.querySelectorAll('.photo-card');
+  if (realCards.length > 0) photoEmpty.style.display = 'none';
+}
