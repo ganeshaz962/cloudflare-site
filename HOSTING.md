@@ -31,34 +31,33 @@ git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
 git push -u origin main
 ```
 
-#### B. Generate an SSH key pair for GitHub Actions
+#### B. Enable password-based SSH on your VM
 
-Run this on your **Windows PC** (in PowerShell):
-```powershell
-ssh-keygen -t ed25519 -C "github-actions-deploy" -f "$HOME\.ssh\github_actions_deploy"
-```
-This creates two files:
-- `~\.ssh\github_actions_deploy`      ← **Private key** (goes into GitHub Secrets)
-- `~\.ssh\github_actions_deploy.pub`  ← **Public key** (goes onto the VM)
-
-#### C. Add the public key to your VM
+By default some VMs disable password login. Run this on the **VM** to allow it:
 ```bash
-# On the VM — append the public key to authorized_keys
-echo "PASTE_PUBLIC_KEY_HERE" >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
+sudo nano /etc/ssh/sshd_config
+```
+Find and set these two lines (add them if missing):
+```
+PasswordAuthentication yes
+PermitRootLogin yes        # only if you log in as root
+```
+Save, then restart SSH:
+```bash
+sudo systemctl restart ssh
 ```
 
-#### D. Add GitHub Secrets
+#### C. Add GitHub Secrets
 Go to your repo → **Settings → Secrets and variables → Actions → New repository secret**
 
-| Secret Name  | Value |
+| Secret Name   | Value |
 |---|---|
-| `VM_HOST`    | Your VM's public IP or domain (e.g. `203.0.113.10`) |
-| `VM_USER`    | SSH username (e.g. `ubuntu`, `root`, `ganesh`) |
-| `VM_SSH_KEY` | **Full contents** of `~\.ssh\github_actions_deploy` (private key) |
-| `VM_PORT`    | SSH port — usually `22` (optional) |
+| `VM_HOST`     | Your VM's public IP or domain (e.g. `203.0.113.10`) |
+| `VM_USER`     | SSH username (e.g. `ganesh`, `ubuntu`, `root`) |
+| `VM_PASSWORD` | Your Linux VM login password |
+| `VM_PORT`     | SSH port — usually `22` (optional) |
 
-#### E. Bootstrap the VM (first time only)
+#### D. Bootstrap the VM (first time only)
 ```bash
 # On the VM — clone your repo and set up Nginx
 sudo apt update && sudo apt install -y nginx git
@@ -83,14 +82,14 @@ curl -o vm-setup.sh https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/ma
 bash vm-setup.sh
 ```
 
-#### F. Allow the deploy user to run sudo git / nginx without password
+#### E. Allow the deploy user to run sudo git / nginx without password
 ```bash
 # On the VM — edit sudoers so GitHub Actions can deploy without a password prompt
 echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/git, /usr/bin/chown, /usr/bin/chmod, /usr/sbin/nginx, /bin/systemctl reload nginx" \
   | sudo tee /etc/sudoers.d/github-deploy
 ```
 
-#### G. Test the pipeline
+#### F. Test the pipeline
 ```powershell
 # On Windows — make a small change and push
 git add .
