@@ -1,0 +1,52 @@
+name: Deploy to Linux VM (Nginx)
+
+# Triggers: push to main branch, or manual run from GitHub UI
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:         # allows manual trigger from GitHub Actions tab
+
+jobs:
+  deploy:
+    name: Build & Deploy Static Site
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout code ──────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. (Optional) Validate HTML ───────────────────────
+      # Remove this step if you don't need HTML linting
+      - name: Check files exist
+        run: |
+          echo "Files being deployed:"
+          find . -not -path './.git/*' -not -path './.github/*' -type f | sort
+
+      # ── 3. Deploy to VM via SSH ───────────────────────────
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:        ${{ secrets.VM_HOST }}       # VM IP or domain
+          username:    ${{ secrets.VM_USER }}       # SSH username (e.g. ubuntu)
+          key:         ${{ secrets.VM_SSH_KEY }}    # Private SSH key (PEM)
+          port:        ${{ secrets.VM_PORT || 22 }} # SSH port (default 22)
+          script: |
+            set -e
+
+            SITE_DIR="/var/www/mysite"
+
+            echo "==> Pulling latest code from GitHub..."
+            cd $SITE_DIR
+            sudo git fetch --all
+            sudo git reset --hard origin/main
+
+            echo "==> Fixing file permissions..."
+            sudo chown -R www-data:www-data $SITE_DIR
+            sudo chmod -R 755 $SITE_DIR
+
+            echo "==> Reloading Nginx..."
+            sudo systemctl reload nginx
+
+            echo "==> Deployment complete!"

@@ -1,0 +1,306 @@
+/* =========================================================
+   RESET & BASE
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:   #4285F4;
+  --red:    #EA4335;
+  --yellow: #FBBC05;
+  --green:  #34A853;
+  --bg:     #f8f9fa;
+  --card:   #ffffff;
+  --text:   #202124;
+  --muted:  #5f6368;
+  --radius: 16px;
+  --shadow: 0 2px 12px rgba(0,0,0,.10);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Segoe UI', 'Google Sans', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* =========================================================
+   HEADER – DOODLE LOGO
+   ========================================================= */
+.site-header {
+  text-align: center;
+  padding: 48px 20px 24px;
+  background: var(--card);
+  border-bottom: 1px solid #e8eaed;
+}
+
+.logo-wrap {
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -2px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Google-style multi-color letters */
+.logo-g    { color: var(--blue);   }
+.logo-a    { color: var(--red);    }
+.logo-n    { color: var(--yellow); }
+.logo-e    { color: var(--blue);   }
+.logo-s    { color: var(--green);  }
+.logo-h    { color: var(--red);    }
+.logo-dot  { color: var(--muted); font-size: 60%; vertical-align: middle; }
+.logo-today{
+  color: var(--text);
+  font-size: 55%;
+  font-weight: 400;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.tagline {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* =========================================================
+   DATE BANNER
+   ========================================================= */
+.date-banner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 0 20px;
+  flex-wrap: wrap;
+}
+
+.date-card {
+  background: linear-gradient(135deg, var(--blue), #1a6ce8);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 20px 32px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  flex-shrink: 0;
+}
+
+.date-day {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.date-month-year {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  margin-top: 4px;
+  opacity: .92;
+}
+
+.date-quote {
+  flex: 1;
+  font-size: 1.25rem;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.6;
+  min-width: 200px;
+}
+
+/* =========================================================
+   GENERIC SECTION
+   ========================================================= */
+.section {
+  max-width: 1100px;
+  margin: 0 auto 48px;
+  padding: 0 20px;
+}
+
+.section-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title .icon { font-size: 1.5rem; }
+
+/* =========================================================
+   EVENTS GRID (Today in History)
+   ========================================================= */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.event-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  box-shadow: var(--shadow);
+  border-left: 5px solid var(--blue);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.event-card:nth-child(2) { border-left-color: var(--red);    }
+.event-card:nth-child(3) { border-left-color: var(--yellow); }
+.event-card:nth-child(4) { border-left-color: var(--green);  }
+.event-card:nth-child(5) { border-left-color: var(--blue);   }
+.event-card:nth-child(6) { border-left-color: var(--red);    }
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.14);
+}
+
+.event-year {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--blue);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.event-card:nth-child(2) .event-year { color: var(--red);    }
+.event-card:nth-child(3) .event-year { color: #b8860b;       }
+.event-card:nth-child(4) .event-year { color: var(--green);  }
+
+.event-desc {
+  font-size: .97rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* =========================================================
+   ACTIVITIES LIST
+   ========================================================= */
+.activities-section { background: transparent; }
+
+.activity-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.activity-list li {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: .97rem;
+  line-height: 1.5;
+  transition: transform .2s;
+}
+
+.activity-list li:hover { transform: translateY(-3px); }
+
+.activity-list .act-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* =========================================================
+   GALLERY
+   ========================================================= */
+.gallery-hint {
+  color: var(--muted);
+  font-size: .9rem;
+  margin-bottom: 18px;
+}
+
+.gallery-hint code {
+  background: #e8f0fe;
+  color: var(--blue);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: .88rem;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 18px;
+}
+
+.gallery-item {
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.gallery-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(0,0,0,.16);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-item .caption {
+  display: block;
+  padding: 8px 12px;
+  font-size: .85rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.gallery-placeholder {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 20px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 2px dashed #dadce0;
+  color: var(--muted);
+  font-size: .95rem;
+  line-height: 1.7;
+}
+
+.gallery-placeholder .placeholder-icon { font-size: 3rem; margin-bottom: 12px; }
+
+.gallery-placeholder code {
+  background: #e8f0fe;
+  color: var(--blue);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+.site-footer {
+  text-align: center;
+  padding: 24px 20px;
+  font-size: .9rem;
+  color: var(--muted);
+  border-top: 1px solid #e8eaed;
+  background: var(--card);
+}
+
+/* =========================================================
+   RESPONSIVE TWEAKS
+   ========================================================= */
+@media (max-width: 600px) {
+  .date-banner { flex-direction: column; align-items: flex-start; }
+  .date-card   { width: 100%; }
+}
