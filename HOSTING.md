@@ -76,27 +76,32 @@ sudo ./svc.sh status    # should show: active (running)
 #### E. Allow the runner user to deploy without a password prompt
 ```bash
 # Replace 'ganesh' with the Linux username that runs the runner
-echo "ganesh ALL=(ALL) NOPASSWD: /usr/bin/rsync, /usr/bin/chown, /usr/bin/chmod, /bin/systemctl reload nginx" \
+echo "sysganesh ALL=(ALL) NOPASSWD: /usr/bin/rsync, /usr/bin/chown, /usr/bin/chmod, /bin/systemctl reload nginx" \
   | sudo tee /etc/sudoers.d/github-runner
 sudo chmod 440 /etc/sudoers.d/github-runner
 ```
 
-#### F. Set up the Nginx web root
+#### F. Set up the Nginx web root (first time only)
+
+Just create the directory — the **workflow will copy the Nginx config automatically** on the first run using `$GITHUB_WORKSPACE` (which always points to the checked-out code).
+
 ```bash
 sudo mkdir -p /var/www/mysite
-sudo chown -R www-data:www-data /var/www/mysite
-
-# Copy Nginx config
-sudo cp ~/actions-runner/_work/*/mysite/nginx/mysite.conf \
-        /etc/nginx/sites-available/mysite
-
-# Edit server_name — use the VM's private IP (App Gateway proxies to this)
-sudo nano /etc/nginx/sites-available/mysite
-
-sudo ln -sf /etc/nginx/sites-available/mysite /etc/nginx/sites-enabled/
-sudo rm -f /etc/nginx/sites-enabled/default
-sudo nginx -t && sudo systemctl reload nginx
+sudo chown -R $USER:www-data /var/www/mysite
+sudo chmod -R 775 /var/www/mysite
 ```
+
+That's it. Trigger the first deploy (Step G below) and the workflow will:
+1. Sync all site files to `/var/www/mysite/`
+2. Detect that `/etc/nginx/sites-available/mysite` doesn't exist yet
+3. Copy `nginx/mysite.conf` from the repo, enable it, and reload Nginx
+
+> **Before triggering**: edit `server_name` in [nginx/mysite.conf](nginx/mysite.conf) locally,
+> change it to `_` (catch-all) since the Application Gateway handles the public hostname:
+> ```nginx
+> server_name _;
+> ```
+> Commit and push that change — the workflow will apply it automatically.
 
 #### G. Test the pipeline
 ```powershell

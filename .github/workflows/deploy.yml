@@ -28,8 +28,10 @@ jobs:
         run: |
           set -e
           SITE_DIR="/var/www/mysite"
+          NGINX_CONF="/etc/nginx/sites-available/mysite"
 
           echo "==> Syncing files to web root..."
+          sudo mkdir -p $SITE_DIR
           sudo rsync -av --delete \
             --exclude '.git' \
             --exclude '.github' \
@@ -39,6 +41,15 @@ jobs:
           echo "==> Fixing file permissions..."
           sudo chown -R www-data:www-data $SITE_DIR
           sudo chmod -R 755 $SITE_DIR
+
+          # ── First-time Nginx config setup ──────────────────
+          if [ ! -f "$NGINX_CONF" ]; then
+            echo "==> Setting up Nginx config (first run)..."
+            sudo cp $GITHUB_WORKSPACE/nginx/mysite.conf $NGINX_CONF
+            sudo ln -sf $NGINX_CONF /etc/nginx/sites-enabled/mysite
+            sudo rm -f /etc/nginx/sites-enabled/default
+            sudo nginx -t
+          fi
 
           echo "==> Reloading Nginx..."
           sudo systemctl reload nginx
