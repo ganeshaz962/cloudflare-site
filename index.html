@@ -45,35 +45,16 @@
   ════════════════════════════════════════ -->
   <main class="main-wrap">
 
-    <!-- TWO-COLUMN: FEED + SIDEBAR -->
-    <div class="feed-layout">
-
-      <!-- LEFT: TODAY'S EVENTS FEED -->
-      <section class="feed-col">
-        <h2 class="section-heading">
-          <span class="heading-dot" style="background:#6c63ff"></span>
-          Today's Updates
-        </h2>
-        <div class="event-feed" id="event-feed">
-          <!-- Injected by JS -->
-        </div>
-      </section>
-
-      <!-- RIGHT: SIDEBAR -->
-      <aside class="sidebar-col">
-
-        <div class="sidebar-card">
-          <h3 class="sidebar-title">🗓 On This Day</h3>
-          <div class="history-list" id="history-list"></div>
-        </div>
-
-        <div class="sidebar-card">
-          <h3 class="sidebar-title">⚡ Things To Do</h3>
-          <ul class="todo-list" id="todo-list"></ul>
-        </div>
-
-      </aside>
-    </div>
+    <!-- TODAY'S UPDATES FEED (full width) -->
+    <section class="feed-section">
+      <h2 class="section-heading">
+        <span class="heading-dot" style="background:#7c3aed"></span>
+        Today's Updates
+      </h2>
+      <div class="event-feed" id="event-feed">
+        <!-- Injected by JS -->
+      </div>
+    </section>
 
     <!-- ════════════════════════════════════════
          PHOTO MEMORIES GRID
@@ -83,51 +64,49 @@
         <span class="heading-dot" style="background:#ff6584"></span>
         Photo Memories
       </h2>
-      <p class="memories-hint">Drop your photos into the <code>photos/</code> folder, then copy the card template below for each photo.</p>
-
       <div class="photo-grid" id="photo-grid">
 
-        <article class="photo-card">
+        <article class="photo-card" data-title="💍 Stylo weds Shuba" data-location="Tuticorin" data-wishes="Thala Thanga Guys" data-img="photos/shared image.jpg">
           <div class="photo-img-wrap">
-            <img src="photos/shared image.jpg" alt="Today's Event" loading="lazy" />
-            <span class="photo-badge">Today</span>
+            <img src="photos/shared image.jpg" alt="Stylo weds Shuba" loading="lazy" />
+            <span class="photo-badge">💒 Wedding</span>
           </div>
           <div class="photo-body">
-            <h3 class="photo-title">🎉 Happy Ugadi & Gudi Padwa!</h3>
-            <p class="photo-desc">Wishing everyone a very Happy New Year! May this Ugadi bring joy, prosperity, and new beginnings to all TTG Friends. 🌸</p>
+            <h3 class="photo-title">💍 Stylo weds Shuba</h3>
+            <p class="photo-desc">Wishing you a lifetime of love, laughter, and beautiful moments together. May your journey as one be filled with endless happiness! 💑</p>
             <div class="photo-meta">
               <span class="photo-date">📅 25 Mar 2026</span>
-              <span class="photo-loc">📍 TTG Friends</span>
+              <span class="photo-loc">📍 Tuticorin</span>
             </div>
           </div>
         </article>
 
-        <article class="photo-card">
+        <article class="photo-card" data-title="💍 Stylo weds Shuba" data-location="Tuticorin" data-wishes="Thala Thanga Guys" data-img="photos/shared image (1).jpg">
           <div class="photo-img-wrap">
-            <img src="photos/shared image (1).jpg" alt="Today's Celebration" loading="lazy" />
-            <span class="photo-badge">Today</span>
+            <img src="photos/shared image (1).jpg" alt="Stylo weds Shuba" loading="lazy" />
+            <span class="photo-badge">💒 Wedding</span>
           </div>
           <div class="photo-body">
-            <h3 class="photo-title">✨ Together We Celebrate</h3>
-            <p class="photo-desc">Every moment shared with friends becomes a lifetime memory. Here's to more such beautiful moments together! 💛</p>
+            <h3 class="photo-title">💑 A Beautiful Beginning</h3>
+            <p class="photo-desc">Two hearts, one soul. Today marks the most beautiful chapter of your lives. Congratulations Stylo & Shuba! 🌸✨</p>
             <div class="photo-meta">
               <span class="photo-date">📅 25 Mar 2026</span>
-              <span class="photo-loc">📍 TTG Friends</span>
+              <span class="photo-loc">📍 Tuticorin</span>
             </div>
           </div>
         </article>
 
-        <article class="photo-card">
+        <article class="photo-card" data-title="💍 Stylo weds Shuba" data-location="Tuticorin" data-wishes="Thala Thanga Guys" data-img="photos/shared image (2).jpg">
           <div class="photo-img-wrap">
-            <img src="photos/shared image (2).jpg" alt="Today's Memories" loading="lazy" />
-            <span class="photo-badge">Today</span>
+            <img src="photos/shared image (2).jpg" alt="Stylo weds Shuba" loading="lazy" />
+            <span class="photo-badge">💒 Wedding</span>
           </div>
           <div class="photo-body">
-            <h3 class="photo-title">🌟 Making Memories</h3>
-            <p class="photo-desc">Today is special — not because of what happens, but because of the people we share it with. Cheers to TTG Friends! 🥂</p>
+            <h3 class="photo-title">🎊 Cheers to the Newlyweds!</h3>
+            <p class="photo-desc">May every day of your married life be as joyful as this one. Thala Thanga Guys send their warmest wishes! 🥳💛</p>
             <div class="photo-meta">
               <span class="photo-date">📅 25 Mar 2026</span>
-              <span class="photo-loc">📍 TTG Friends</span>
+              <span class="photo-loc">📍 Tuticorin</span>
             </div>
           </div>
         </article>
@@ -156,6 +135,34 @@
       <span class="footer-tag">Every day is worth remembering 🌟</span>
     </div>
   </footer>
+
+  <!-- ════════════════════════════════════════
+       PHOTO LIGHTBOX MODAL
+  ════════════════════════════════════════ -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo detail">
+    <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+    <div class="lightbox-box">
+      <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
+      <div class="lightbox-img-wrap">
+        <img src="" alt="" id="lightbox-img" />
+      </div>
+      <div class="lightbox-info">
+        <div class="lightbox-banner">
+          <span class="lb-rings">💍</span>
+          <div>
+            <h2 class="lb-title" id="lb-title"></h2>
+            <p class="lb-wishes-label">Wishes from</p>
+            <p class="lb-wishes" id="lb-wishes"></p>
+          </div>
+        </div>
+        <div class="lb-meta">
+          <span class="lb-meta-item">📍 <span id="lb-location"></span></span>
+          <span class="lb-meta-item">📅 25 Mar 2026</span>
+        </div>
+        <p class="lb-quote">"May your love story be the most beautiful chapter ever written. Congratulations! 💑"</p>
+      </div>
+    </div>
+  </div>
 
   <script src="js/main.js"></script>
 </body>
