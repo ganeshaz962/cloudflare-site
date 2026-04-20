@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - 'cf portal/dns-nameservers/**'   # only run when nameserver config changes
+      - 'cf portal/dns-nameservers/**'   # only run when nameserver config change
 
 jobs:
   update-nameservers:
