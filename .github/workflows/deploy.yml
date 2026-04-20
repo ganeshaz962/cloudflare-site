@@ -11,47 +11,59 @@ jobs:
   deploy:
     name: Build & Deploy Static Site
 
-    # Self-hosted runner runs ON the VM itself.
-    # The VM connects OUT to GitHub — no inbound ports needed.
-    # VM only needs outbound HTTPS (port 443) to github.com.
-    runs-on: self-hosted
+    # GitHub-hosted runner — connects to VM via SSH to deploy
+    runs-on: ubuntu-latest
 
     steps:
-      # ── 1. Checkout latest code directly onto the VM ──────
+      # ── 1. Checkout code onto the GitHub runner ───────────
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          clean: true           # ensure a clean workspace each run
 
-      # ── 2. Deploy files to Nginx web root ─────────────────
-      - name: Deploy to web root
+      # ── 2. Deploy files to VM via rsync over SSH ──────────
+      - name: Deploy to web root via SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
         run: |
           set -e
           SITE_DIR="/var/www/mysite"
           NGINX_CONF="/etc/nginx/sites-available/mysite"
 
-          echo "==> Syncing files to web root..."
-          sudo mkdir -p $SITE_DIR
-          sudo rsync -av --delete \
+          # Write SSH key and set permissions
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts
+
+          echo "==> Syncing files to VM web root..."
+          rsync -av --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
             --exclude '.git' \
             --exclude '.github' \
             --exclude 'scripts' \
-            $GITHUB_WORKSPACE/ $SITE_DIR/
+            ./ "$VM_USER@$VM_HOST:~/site-staging/"
 
-          echo "==> Fixing file permissions..."
-          sudo chown -R www-data:www-data $SITE_DIR
-          sudo chmod -R 755 $SITE_DIR
+          echo "==> Running deploy commands on VM..."
+          ssh -i ~/.ssh/deploy_key "$VM_USER@$VM_HOST" bash << 'EOF'
+            set -e
+            SITE_DIR="/var/www/mysite"
+            NGINX_CONF="/etc/nginx/sites-available/mysite"
 
-          # ── First-time Nginx config setup ──────────────────
-          if [ ! -f "$NGINX_CONF" ]; then
-            echo "==> Setting up Nginx config (first run)..."
-            sudo cp $GITHUB_WORKSPACE/nginx/mysite.conf $NGINX_CONF
-            sudo ln -sf $NGINX_CONF /etc/nginx/sites-enabled/mysite
-            sudo rm -f /etc/nginx/sites-enabled/default
-            sudo nginx -t
-          fi
+            sudo mkdir -p $SITE_DIR
+            sudo rsync -av --delete ~/site-staging/ $SITE_DIR/
 
-          echo "==> Reloading Nginx..."
-          sudo systemctl reload nginx
+            sudo chown -R www-data:www-data $SITE_DIR
+            sudo chmod -R 755 $SITE_DIR
 
-          echo "==> Deployment complete!"
+            if [ ! -f "$NGINX_CONF" ]; then
+              echo "==> Setting up Nginx config (first run)..."
+              sudo cp ~/site-staging/nginx/mysite.conf $NGINX_CONF
+              sudo ln -sf $NGINX_CONF /etc/nginx/sites-enabled/mysite
+              sudo rm -f /etc/nginx/sites-enabled/default
+              sudo nginx -t
+            fi
+
+            sudo systemctl reload nginx
+            echo "==> Deployment complete!"
+          EOF
