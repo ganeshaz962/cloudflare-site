@@ -1,4 +1,5 @@
 domains:
+    # last updated: 2026-04-20
     - ttgfriends.in:
           #   - ns1-01.azure-dns.com #disabled azure nameservers
           #   - ns2-01.azure-dns.net
