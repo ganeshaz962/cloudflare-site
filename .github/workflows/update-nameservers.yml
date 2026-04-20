@@ -1,0 +1,55 @@
+name: Update GoDaddy Nameservers
+
+# Triggers: manual run from GitHub UI, or push to main when domains.yaml changes
+on:
+  workflow_dispatch:         # manual trigger from GitHub Actions tab
+  push:
+    branches:
+      - main
+    paths:
+      - 'cf portal/dns-nameservers/**'   # only run when nameserver config changes
+
+jobs:
+  update-nameservers:
+    name: Update Nameservers via GoDaddy API
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout code ───────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Set up Python ───────────────────────────────────
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # ── 3. Install dependencies ────────────────────────────
+      - name: Install dependencies
+        run: pip install requests pyyaml
+
+      # ── 4. Dry-run first (shows what would change) ─────────
+      - name: Dry-run nameserver update
+        working-directory: 'cf portal/dns-nameservers'
+        env:
+          GD_API_KEY: ${{ secrets.GODADDY_API_KEY }}
+          GD_API_SECRET: ${{ secrets.GODADDY_API_SECRET }}
+        run: |
+          python update-nameservers-godaddy.py \
+            --api-key "$GD_API_KEY" \
+            --api-secret "$GD_API_SECRET" \
+            --config ../domains.yaml \
+            --dry-run
+
+      # ── 5. Apply nameserver update ─────────────────────────
+      - name: Apply nameserver update
+        working-directory: 'cf portal/dns-nameservers'
+        env:
+          GD_API_KEY: ${{ secrets.GODADDY_API_KEY }}
+          GD_API_SECRET: ${{ secrets.GODADDY_API_SECRET }}
+        run: |
+          python update-nameservers-godaddy.py \
+            --api-key "$GD_API_KEY" \
+            --api-secret "$GD_API_SECRET" \
+            --config ../domains.yaml

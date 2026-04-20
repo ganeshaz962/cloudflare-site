@@ -1,0 +1,8 @@
+domains:
+    - ttgfriends.in:
+          #   - ns1-01.azure-dns.com #disabled azure nameservers
+          #   - ns2-01.azure-dns.net
+          #   - ns3-01.azure-dns.org
+          #   - ns4-01.azure-dns.info
+          - samara.ns.cloudflare.com
+          - sergi.ns.cloudflare.com
