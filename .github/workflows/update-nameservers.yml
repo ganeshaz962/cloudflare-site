@@ -39,7 +39,6 @@ jobs:
           python update-nameservers-godaddy.py \
             --api-key "$GD_API_KEY" \
             --api-secret "$GD_API_SECRET" \
-            --config ../domains.yaml \
             --dry-run
 
       # ── 5. Apply nameserver update ─────────────────────────
@@ -51,5 +50,4 @@ jobs:
         run: |
           python update-nameservers-godaddy.py \
             --api-key "$GD_API_KEY" \
-            --api-secret "$GD_API_SECRET" \
-            --config ../domains.yaml
+            --api-secret "$GD_API_SECRET"

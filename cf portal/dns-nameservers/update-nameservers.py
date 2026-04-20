@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''
 """
 CSC Domain Manager Nameserver Update Automation
 
@@ -190,3 +191,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+'''
